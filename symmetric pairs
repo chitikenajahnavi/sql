@@ -1,0 +1,1 @@
+select * from ((select distinct f1.X, f1.Y from functions f1 join functions f2 on f1.X = f2.Y and f1.Y = f2.X and f1.X < f1.Y ) union (select X, Y from functions where X=Y group by X,Y having count(*) > 1))t order by t.X
