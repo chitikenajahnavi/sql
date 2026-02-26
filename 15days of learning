@@ -1,0 +1,16 @@
+with daily_submissions as (
+    select submission_date, hacker_id, count(*) as_cnt from Submissions group by submission_date, hacker_id
+),
+contest_days as(
+    select distinct submission_date,
+    dense_rank() over (order by submission_date) as d_num from Submissions
+),
+hacker_day_count as (
+    select s.submission_date, s.hacker_id, count(distinct s2.submission_date) as d_submitted from Submissions s join Submissions s2 on s.hacker_id = s2.hacker_id and s2.submission_date <= s.submission_date group by s.submission_date, s.hacker_id 
+),
+continuous_hackers as (
+    select hdc.submission_date, count(distinct hdc.hacker_id) as uniq_hackr from hacker_day_count as hdc join contest_days cd on hdc.submission_date = cd.submission_date where hdc.d_submitted = cd.d_num group by hdc.submission_date
+),
+daily_top_hackers as (
+    select submission_date, hacker_id from (select submission_date, hacker_id, row_number() over (partition by submission_date order by count(*) desc, hacker_id) as rn from submissions group by submission_date, hacker_id) x where rn = 1)
+select ch.submission_date, ch.uniq_hackr, dth.hacker_id, h.name from continuous_hackers ch join daily_top_hackers dth on ch.submission_date = dth.submission_date join hackers h on dth.hacker_id = h.hacker_id order by ch.submission_date;
