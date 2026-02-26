@@ -1,0 +1,8 @@
+/*
+Enter your query here.
+*/
+WITH Project AS ( SELECT *, DATE_SUB(End_Date, INTERVAL ROW_NUMBER() OVER (ORDER BY End_Date) DAY) AS Project_Group FROM Projects ),
+
+Project_Duration AS ( SELECT MIN(Start_Date) AS P_Start_Date, MAX(End_Date) AS P_End_Date FROM Project GROUP BY Project_Group )
+
+SELECT * FROM Project_Duration ORDER BY DATEDIFF(P_End_Date, P_Start_Date), P_Start_Date;
